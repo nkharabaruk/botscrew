@@ -15,4 +15,16 @@ public class Book {
     Integer id;
     String name;
     String author;
+
+    public Book() {}
+
+    public Book(String author, String name) {
+        this.author = author;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return author + " \"" + name + "\"";
+    }
 }

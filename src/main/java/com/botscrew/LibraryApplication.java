@@ -25,9 +25,6 @@ public class LibraryApplication implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-        System.out.print("Welcome to library! ");
-        while (true) {
-            bookController.start();
-        }
+        bookController.start();
     }
 }

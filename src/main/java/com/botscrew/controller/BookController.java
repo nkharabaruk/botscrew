@@ -23,53 +23,58 @@ public class BookController {
         this.parserService = parserService;
     }
 
-    Scanner scanner = new Scanner(new InputStreamReader(System.in));
+
 
     public void start() {
         greeting();
-        String input = scanner.nextLine().trim();
-        try {
-            doAction(parserService.parseCommand(input), parserService.parseBook(input));
-        } catch (IllegalArgumentException ex) {
-            System.out.println("Wrong command, try again!");
+        while (true) {
+            Scanner scanner = new Scanner(new InputStreamReader(System.in));
+            try {
+                doAction(scanner.nextLine().trim());
+            } catch (IllegalArgumentException ex) {
+                System.out.println("Wrong command, try again! ");
+            }
         }
     }
 
-    private void doAction(Command command, Book book) {
+    private void doAction(String input) {
+        Command command = parserService.parseCommand(input);
         switch (command) {
-            case ADD: addBook(book); break;
-            case EDIT: editBook(book.toString()); break;
-            case REMOVE: removeBook(book); break;
+            case ADD: addBook(parserService.parseBook(input)); break;
+            case EDIT: editBook(parserService.parseBookName(input)); break;
+            case REMOVE: removeBook(parserService.parseBookName(input)); break;
             case ALL: showAllBooks(); break;
             case HELP: writeHelp(); break;
             case EXIT: exit(); break;
+            default:
+                System.out.println("Incorrect input");
         }
     }
 
     void addBook(Book book) {
         bookService.createBook(book);
-        System.out.println("book " + book.getAuthor() + " \"" + book.getName() + "\" was added");
+        System.out.println("book " + book.toString() + " was added");
     }
 
     void editBook(String name) {
-        List<Book> books = (List<Book>) bookService.findBooks(name);
-        Book book = null;
-        if (books.size() == 0) {
-            System.out.println("We have not book with such name.");
-        } else if (books.size() > 1) {
-            book = checkOneBook(books);
-            System.out.println(book);
-        } else {
-            book = books.get(0);
+        try {
+            String oldName = name.substring(0, name.indexOf(" ") - 1);
+            String newName = name.substring(name.indexOf(" ") + 2, name.length());
+            Book book = getBook(oldName);
+            if (book != null) {
+                System.out.println("Book " + book.toString() + " was edited to \"" + newName + "\". ");
+                book.setName(newName);
+                bookService.updateBook(book);
+            }
+        } catch (StringIndexOutOfBoundsException ex) {
+            System.out.println("Input is not correct. ");
         }
-        System.out.print("Book " + book.getAuthor() + "\"" + book.getName() + "\" was edited to ");
-        bookService.updateBook(book);
-        System.out.println(book.getName() + ".");
     }
 
-    void removeBook(Book book) {
+    void removeBook(String name) {
+        Book book = getBook(name);
+        System.out.println("book " + book.toString() + " was removed");
         bookService.deleteBook(book);
-        System.out.println("book " + book.getAuthor() + "\"" + book.getName() + "\" was removed");
     }
 
     void showAllBooks() {
@@ -84,31 +89,51 @@ public class BookController {
         }
     }
 
-    private Book checkOneBook(List<Book> books) {
-        System.out.println("We have few books with such name please choose one by typing a number of book:");
+    private Book getBook(String name) {
+        List<Book> books = (List<Book>) bookService.findBooks(name);
+        Book book = null;
+        if (books.size() == 0) {
+            System.out.println("We have not book with such name. ");
+        } else if (books.size() > 1) {
+            book = selectOneBook(books);
+            System.out.println(book);
+        } else {
+            book = books.get(0);
+        }
+        return book;
+    }
+
+    private Book selectOneBook(List<Book> books) {
+        System.out.println("We have few books with such name please choose one by typing a number of book: ");
         for (int i = 0; i < books.size(); i++) {
-            System.out.println((i + 1) + ". " + books.get(i).getAuthor() + " \"" + books.get(i).getName() + "\"");
+            System.out.println((i + 1) + ". " + books.get(i).toString());
         }
-        int num = scanner.nextInt() - 1;
-        if (num > books.size() || num < 1) {
-            System.out.println("Number is not correct. Try again.");
+
+        Scanner scanner = new Scanner(new InputStreamReader(System.in));
+        int num = scanner.nextInt();
+        while (true) {
+            if (num > books.size() || num < 1) {
+                System.out.println("Number is not correct. Try again. ");
+            } else {
+                return books.get(num - 1);
+            }
         }
-        return books.get(num);
     }
 
     private void greeting() {
+        System.out.print("Welcome to library! ");
         System.out.println("What do you want to do?");
-        System.out.println("Type 'help' to show allowed commands.");
+        System.out.println("Type 'help' to show allowed commands. ");
     }
 
     private void writeHelp() {
         System.out.println("Type:");
-        System.out.println("1) add *author`s name* *book`s name* - to add book.");
-        System.out.println("2) edit *old book`s name* *new book`s name* - to edit book.");
-        System.out.println("3) remove *book`s name* - to delete book.");
-        System.out.println("4) all books - to show all books.");
-        System.out.println("6) help - to show hint.");
-        System.out.println("4) exit - to finish interaction.");
+        System.out.println("- add *author`s name* *book`s name* - to add book.");
+        System.out.println("- edit *old book`s name* *new book`s name* - to edit book.");
+        System.out.println("- remove *book`s name* - to delete book.");
+        System.out.println("- all books - to show all books.");
+        System.out.println("- help - to show hint.");
+        System.out.println("- exit - to finish interaction.");
     }
 
     private void exit() {

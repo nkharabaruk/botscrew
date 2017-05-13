@@ -10,4 +10,6 @@ public interface ParserService {
     Command parseCommand(String input);
 
     Book parseBook(String input);
+
+    String parseBookName(String input);
 }

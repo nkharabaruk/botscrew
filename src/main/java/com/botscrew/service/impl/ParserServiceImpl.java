@@ -9,27 +9,26 @@ import org.springframework.stereotype.Service;
 public class ParserServiceImpl implements ParserService{
 
     public Command parseCommand(String input) {
-        String strCommand = input.split(" ")[0];
-        return Command.valueOf(strCommand.trim().toUpperCase());
+        try {
+            return Command.valueOf(input.trim().split(" ")[0].trim().toUpperCase());
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public Book parseBook(String input) {
-        Book book = new Book();
-        try {
-            if (input.indexOf(" ") + 1 != input.indexOf("\"")) {
-                book.setAuthor(input.substring(input.indexOf(" ") + 1, input.indexOf("\"")));
-            }
-            String bookName = input.substring(input.indexOf("\"") + 1, input.lastIndexOf("\""));
-            if (bookName.contains("\"")) {
-                String oldName = bookName.trim().split(" ")[0];
-                String newName = bookName.trim().split(" ")[1];
-            } else {
-                book.setName(input.substring(input.indexOf("\"") + 1, input.lastIndexOf("\"")));
-            }
-            return book;
-        } catch (StringIndexOutOfBoundsException ex) {
-            book = null;
+        return new Book(parseAuthor(input), parseBookName(input));
+    }
+
+    public String parseAuthor(String input) {
+        return input.substring(parseCommand(input).toString().length(), input.indexOf('"')).trim();
+    }
+
+    public String parseBookName(String input) {
+        if (input.contains("\"")) {
+            return input.substring(input.indexOf("\"") + 1, input.lastIndexOf("\"")).trim();
+        } else {
+            return input.substring(parseCommand(input).toString().length()).trim();
         }
-        return null;
     }
 }
