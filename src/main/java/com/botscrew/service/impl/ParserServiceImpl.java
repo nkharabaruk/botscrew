@@ -31,8 +31,10 @@ public class ParserServiceImpl implements ParserService {
     public String parseBookName(String input) {
         if (input.contains("\"")) {
             return input.substring(input.indexOf("\"") + 1, input.lastIndexOf("\"")).trim();
-        } else {
+        } else if (input.contains(" ")) {
             return input.substring(input.indexOf(" "), input.length()).trim();
+        } else {
+            throw new IllegalArgumentException("Incorrect input. ");
         }
     }
 

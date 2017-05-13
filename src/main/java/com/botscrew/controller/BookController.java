@@ -7,7 +7,6 @@ import com.botscrew.service.ParserService;
 import org.springframework.stereotype.Controller;
 
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -24,8 +23,8 @@ public class BookController {
         this.parserService = parserService;
     }
 
-    boolean isActive = true;
-    Command command = null;
+    private boolean isActive = true;
+    private Command command = null;
 
     public void start() {
         greeting();
@@ -70,35 +69,37 @@ public class BookController {
         }
     }
 
-    void addBook(Book book) {
+    private void addBook(Book book) {
         bookService.createBook(book);
         System.out.println("book " + book.toString() + " was added");
     }
 
-    void editBook(String name) {
+    private void editBook(String name) {
         try {
             String oldName = parserService.parseOldBookName(name);
             String newName = parserService.parseNewBookName(name);
             Book book = getBook(oldName);
             if (book != null) {
-                System.out.println("Book " + book.toString() + " was edited to \"" + newName + "\". ");
                 book.setName(newName);
                 bookService.updateBook(book);
+                System.out.println("Book " + book.getAuthor() + " \"" + oldName + "\"" + " was edited to \"" + newName + "\". ");
             }
         } catch (StringIndexOutOfBoundsException ex) {
             System.out.println("Do you mean - edit \"old book`s name\" \"new book`s name\" ?");
         }
     }
 
-    void removeBook(String name) {
+    private void removeBook(String name) {
         Book book = getBook(name);
         if (book != null) {
-            System.out.println("book " + book.toString() + " was removed");
+            String bookName = book.getName();
+            String bookAuthor = book.getAuthor();
             bookService.deleteBook(book);
+            System.out.println("book " + bookAuthor + " \"" + bookName + "\" was removed");
         }
     }
 
-    void showAllBooks() {
+    private void showAllBooks() {
         List<Book> books = bookService.getBooks();
         if (books.size() == 0) {
             System.out.println("We have not any book.");
