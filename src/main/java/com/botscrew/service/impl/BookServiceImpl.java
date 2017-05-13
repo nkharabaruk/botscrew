@@ -5,10 +5,10 @@ import com.botscrew.repository.BookRepository;
 import com.botscrew.service.BookService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.List;
 
 @Service
-public class BookServiceImpl implements BookService{
+public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
@@ -17,8 +17,8 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Collection<Book> getBooks() {
-        return (Collection<Book>) bookRepository.findAll();
+    public List<Book> getBooks() {
+        return (List<Book>) bookRepository.findAll();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Collection<Book> findBooks(String name) {
+    public List<Book> findBooks(String name) {
         return bookRepository.findByName(name);
     }
 

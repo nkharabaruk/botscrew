@@ -12,4 +12,8 @@ public interface ParserService {
     Book parseBook(String input);
 
     String parseBookName(String input);
+
+    String parseOldBookName(String name);
+
+    String parseNewBookName(String name);
 }

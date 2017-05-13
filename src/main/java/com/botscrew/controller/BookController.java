@@ -7,7 +7,7 @@ import com.botscrew.service.ParserService;
 import org.springframework.stereotype.Controller;
 
 import java.io.InputStreamReader;
-import java.util.Collection;
+import java.util.List;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -24,30 +24,49 @@ public class BookController {
         this.parserService = parserService;
     }
 
+    boolean isActive = true;
+    Command command = null;
+
     public void start() {
         greeting();
-        while (true) {
+        while (isActive) {
             Scanner scanner = new Scanner(new InputStreamReader(System.in));
+            String input = scanner.nextLine().trim();
+            command = parserService.parseCommand(input);
             try {
-                doAction(scanner.nextLine().trim());
+                if (command != null) {
+                    doAction(input);
+                } else {
+                    throw new IllegalArgumentException("No such command! ");
+                }
             } catch (IllegalArgumentException ex) {
-                System.out.println("Wrong command, try again! ");
+                System.out.println(ex.getMessage());
             }
         }
     }
 
     private void doAction(String input) {
-        Command command = parserService.parseCommand(input);
         switch (command) {
             case ADD:
-                addBook(parserService.parseBook(input)); break;
-            case EDIT: editBook(parserService.parseBookName(input)); break;
-            case REMOVE: removeBook(parserService.parseBookName(input)); break;
-            case ALL: showAllBooks(); break;
-            case HELP: writeHelp(); break;
-            case EXIT: exit(); break;
+                addBook(parserService.parseBook(input));
+                break;
+            case EDIT:
+                editBook(parserService.parseBookName(input));
+                break;
+            case REMOVE:
+                removeBook(parserService.parseBookName(input));
+                break;
+            case ALL:
+                showAllBooks();
+                break;
+            case HELP:
+                writeHelp();
+                break;
+            case EXIT:
+                exit();
+                break;
             default:
-                System.out.println("Incorrect input");
+                throw new IllegalArgumentException("Wrong command, try again! ");
         }
     }
 
@@ -58,8 +77,8 @@ public class BookController {
 
     void editBook(String name) {
         try {
-            String oldName = name.substring(0, name.indexOf(" ") - 1);
-            String newName = name.substring(name.indexOf(" ") + 2, name.length());
+            String oldName = parserService.parseOldBookName(name);
+            String newName = parserService.parseNewBookName(name);
             Book book = getBook(oldName);
             if (book != null) {
                 System.out.println("Book " + book.toString() + " was edited to \"" + newName + "\". ");
@@ -80,7 +99,7 @@ public class BookController {
     }
 
     void showAllBooks() {
-        Collection<Book> books = bookService.getBooks();
+        List<Book> books = bookService.getBooks();
         if (books.size() == 0) {
             System.out.println("We have not any book.");
         } else {
@@ -92,7 +111,7 @@ public class BookController {
     }
 
     private Book getBook(String name) {
-        List<Book> books = (List<Book>) bookService.findBooks(name);
+        List<Book> books = bookService.findBooks(name);
         Book book = null;
         if (books.size() == 0) {
             System.out.println("We have not book with such name. ");
@@ -125,23 +144,22 @@ public class BookController {
     }
 
     private void greeting() {
-        System.out.print("Welcome to library! ");
-        System.out.println("What do you want to do?");
-        System.out.println("Type 'help' to show allowed commands. ");
+        System.out.println("Welcome to library! What do you want to do?" +
+                "\nType 'help' to show allowed commands. ");
     }
 
     private void writeHelp() {
-        System.out.println("Type:");
-        System.out.println("- add *author`s name* *book`s name* - to add book.");
-        System.out.println("- edit *old book`s name* *new book`s name* - to edit book.");
-        System.out.println("- remove *book`s name* - to delete book.");
-        System.out.println("- all books - to show all books.");
-        System.out.println("- help - to show hint.");
-        System.out.println("- exit - to finish interaction.");
+        System.out.println("Type: " +
+                "\n- add *author`s name* *book`s name* - to add book." +
+                "\n- edit *old book`s name* *new book`s name* - to edit book." +
+                "\n- remove *book`s name* - to delete book." +
+                "\n- all books - to show all books." +
+                "\n- help - to show hint." +
+                "\n- exit - to finish interaction.");
     }
 
     private void exit() {
         System.out.println("Bye! Come back later.");
-        System.exit(0);
+        isActive = false;
     }
 }

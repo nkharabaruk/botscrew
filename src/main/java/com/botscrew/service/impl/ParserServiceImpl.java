@@ -6,12 +6,12 @@ import com.botscrew.service.ParserService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ParserServiceImpl implements ParserService{
+public class ParserServiceImpl implements ParserService {
 
     public Command parseCommand(String input) {
         try {
             return Command.valueOf(input.trim().split(" ")[0].trim().toUpperCase());
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException ex) {
             return null;
         }
     }
@@ -34,5 +34,15 @@ public class ParserServiceImpl implements ParserService{
         } else {
             return input.substring(input.indexOf(" "), input.length()).trim();
         }
+    }
+
+    @Override
+    public String parseOldBookName(String name) {
+        return name.substring(0, name.indexOf(" ") - 1);
+    }
+
+    @Override
+    public String parseNewBookName(String name) {
+        return name.substring(name.indexOf(" ") + 2, name.length());
     }
 }
