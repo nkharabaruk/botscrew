@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,8 +23,6 @@ public class BookController {
         this.bookService = bookService;
         this.parserService = parserService;
     }
-
-
 
     public void start() {
         greeting();
@@ -40,7 +39,8 @@ public class BookController {
     private void doAction(String input) {
         Command command = parserService.parseCommand(input);
         switch (command) {
-            case ADD: addBook(parserService.parseBook(input)); break;
+            case ADD:
+                addBook(parserService.parseBook(input)); break;
             case EDIT: editBook(parserService.parseBookName(input)); break;
             case REMOVE: removeBook(parserService.parseBookName(input)); break;
             case ALL: showAllBooks(); break;
@@ -67,14 +67,16 @@ public class BookController {
                 bookService.updateBook(book);
             }
         } catch (StringIndexOutOfBoundsException ex) {
-            System.out.println("Input is not correct. ");
+            System.out.println("Do you mean - edit \"old book`s name\" \"new book`s name\" ?");
         }
     }
 
     void removeBook(String name) {
         Book book = getBook(name);
-        System.out.println("book " + book.toString() + " was removed");
-        bookService.deleteBook(book);
+        if (book != null) {
+            System.out.println("book " + book.toString() + " was removed");
+            bookService.deleteBook(book);
+        }
     }
 
     void showAllBooks() {
@@ -96,7 +98,6 @@ public class BookController {
             System.out.println("We have not book with such name. ");
         } else if (books.size() > 1) {
             book = selectOneBook(books);
-            System.out.println(book);
         } else {
             book = books.get(0);
         }
@@ -110,13 +111,16 @@ public class BookController {
         }
 
         Scanner scanner = new Scanner(new InputStreamReader(System.in));
-        int num = scanner.nextInt();
-        while (true) {
-            if (num > books.size() || num < 1) {
-                System.out.println("Number is not correct. Try again. ");
-            } else {
+        try {
+            int num = scanner.nextInt();
+            if (num < books.size() & num > 0) {
                 return books.get(num - 1);
+            } else {
+                throw new InputMismatchException();
             }
+        } catch (InputMismatchException ex) {
+            System.out.println("Number is not correct. Try again. ");
+            return null;
         }
     }
 

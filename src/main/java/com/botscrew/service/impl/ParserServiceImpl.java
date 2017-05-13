@@ -21,14 +21,18 @@ public class ParserServiceImpl implements ParserService{
     }
 
     public String parseAuthor(String input) {
-        return input.substring(parseCommand(input).toString().length(), input.indexOf('"')).trim();
+        if (input.contains("\"")) {
+            return input.substring(parseCommand(input).toString().length(), input.indexOf('"')).trim();
+        } else {
+            return "Unknown";
+        }
     }
 
     public String parseBookName(String input) {
         if (input.contains("\"")) {
             return input.substring(input.indexOf("\"") + 1, input.lastIndexOf("\"")).trim();
         } else {
-            return input.substring(parseCommand(input).toString().length()).trim();
+            return input.substring(input.indexOf(" "), input.length()).trim();
         }
     }
 }
